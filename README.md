@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/icon.png" width="128" height="128" alt="SmoothWheel icon"></p>
+
 # SmoothWheel
 
 A free, open-source menu bar app for macOS that makes a notched mouse wheel scroll smoothly, like a trackpad.
@@ -100,6 +102,7 @@ Use `./test.sh` rather than plain `swift test`. With only the Command Line Tools
 | `Sources/SmoothWheel/AppController.swift` | Ties settings, exclusions and logging together |
 | `Sources/SmoothWheel/SmoothWheelApp.swift` | Menu bar panel |
 | `Sources/SmoothWheel/SettingsView.swift` | Settings window |
+| `scripts/make-icon.swift` | Draws the app icon; regenerate with `swift scripts/make-icon.swift` |
 
 ## Disclaimer
 

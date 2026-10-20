@@ -17,9 +17,10 @@ BIN="$(swift build -c release --scratch-path "$SCRATCH" --show-bin-path)/SmoothW
 
 APP="build/SmoothWheel.app"
 rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/SmoothWheel"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
+cp Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 
 IDENTITY="${SMOOTHWHEEL_SIGN_IDENTITY:-SmoothWheel Local}"
 # Not `-v`: that lists trusted identities only. Sign by SHA-1 so the name can't be ambiguous.
