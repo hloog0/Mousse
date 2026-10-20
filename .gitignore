@@ -1,0 +1,14 @@
+# Build output
+.build/
+.build-release/
+build/
+.swiftpm/
+
+# macOS
+.DS_Store
+
+# Never commit signing material
+*.p12
+*.pem
+*.cer
+*.key
