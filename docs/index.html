@@ -475,21 +475,28 @@
   document.fonts?.ready.then(measure);
 
   // Only run while the demo is on screen.
-  new IntersectionObserver(([entry]) => entry.isIntersecting ? play() : pause(), { threshold: 0.2 })
-    .observe(document.querySelector(".demo"));
+  const demo = document.querySelector(".demo");
+  onViewportChange(() => {
+    const r = demo.getBoundingClientRect();
+    r.bottom > 0 && r.top < innerHeight ? play() : pause();
+  });
 
   document.querySelector(".replay").addEventListener("click", () => { elapsed = 0; render(0); play(); });
 })();
 
-// Fade sections in as they arrive.
-(() => {
-  const items = document.querySelectorAll(".reveal");
-  if (!("IntersectionObserver" in window)) { items.forEach(el => el.classList.add("in")); return; }
-  const io = new IntersectionObserver(entries => {
-    for (const e of entries) if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
-  }, { threshold: 0.12 });
-  items.forEach(el => io.observe(el));
-})();
+// Fade sections in once they've reached the screen (or been scrolled past).
+onViewportChange(() => {
+  for (const el of document.querySelectorAll(".reveal:not(.in)")) {
+    if (el.getBoundingClientRect().top < innerHeight * 0.92) el.classList.add("in");
+  }
+});
+
+// Plain position checks on load, scroll and resize. (They also catch the browser restoring
+// a scroll position on reload, which visibility observers can miss.)
+function onViewportChange(check) {
+  for (const type of ["scroll", "resize", "pageshow", "load"]) addEventListener(type, check, { passive: true });
+  check();
+}
 </script>
 </body>
 </html>
