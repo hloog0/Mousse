@@ -3,206 +3,370 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SmoothWheel: smooth mouse scrolling for Mac</title>
-<meta name="description" content="Free, open-source menu bar app that gives any notched mouse wheel smooth, trackpad-style scrolling on macOS.">
-<meta property="og:title" content="SmoothWheel: smooth mouse scrolling for Mac">
-<meta property="og:description" content="Free, open-source menu bar app that gives any notched mouse wheel smooth, trackpad-style scrolling on macOS.">
+<title>SmoothWheel: make your mouse wheel glide</title>
+<meta name="description" content="Free, open-source Mac app that turns every click of a notched mouse wheel into smooth, trackpad-style scrolling.">
+<meta property="og:title" content="SmoothWheel: make your mouse wheel glide">
+<meta property="og:description" content="Free, open-source Mac app that turns every click of a notched mouse wheel into smooth, trackpad-style scrolling.">
 <meta property="og:image" content="https://hloog0.github.io/SmoothWheel/icon.png">
 <meta property="og:url" content="https://hloog0.github.io/SmoothWheel/">
 <meta name="twitter:card" content="summary">
 <link rel="icon" type="image/png" href="icon.png">
+<script>document.documentElement.classList.add("js")</script>
 <style>
   :root {
-    --bg: #f7f8f9;
+    --bg: #f6f8f8;
     --surface: #ffffff;
-    --text: #15171a;
-    --muted: #5d636b;
-    --line: #e3e6ea;
-    --accent: #0e8f86;
-    --accent-strong: #0a7770;
-    --accent-soft: #e2f6f1;
-    --demo-bar: #d9dee4;
-    --demo-bar-strong: #b9c1ca;
-    --shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.06);
+    --text: #101415;
+    --muted: #586266;
+    --line: #e1e6e7;
+    --accent: #0b8a80;
+    --accent-soft: #dcf5ef;
+    --mint: #4fe3bc;
+    --card-shadow: 0 1px 2px rgba(10, 40, 40, .06), 0 12px 32px rgba(10, 40, 40, .08);
+    --window-shadow: 0 30px 80px rgba(4, 30, 38, .25), 0 2px 6px rgba(4, 30, 38, .12);
+    --story: #23292b;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #111315;
-      --surface: #1a1d20;
-      --text: #eceef0;
-      --muted: #9aa1a9;
-      --line: #2a2e33;
-      --accent: #3fd6b0;
-      --accent-strong: #63e3c3;
-      --accent-soft: #15302b;
-      --demo-bar: #30353b;
-      --demo-bar-strong: #454c54;
-      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+      --bg: #0c1012;
+      --surface: #151b1e;
+      --text: #ecf1f2;
+      --muted: #97a3a7;
+      --line: #263034;
+      --accent: #4fe3bc;
+      --accent-soft: #123430;
+      --card-shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 12px 32px rgba(0, 0, 0, .35);
+      --window-shadow: 0 30px 80px rgba(0, 0, 0, .55), 0 2px 6px rgba(0, 0, 0, .4);
+      --story: #d9e1e3;
     }
   }
+
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0;
     background: var(--bg);
     color: var(--text);
-    font: 17px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    font: 17px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    overflow-x: hidden;
   }
   a { color: var(--accent); }
-  .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
 
-  header { text-align: center; padding: 72px 0 40px; }
-  header img { width: 128px; height: 128px; }
-  h1 { font-size: clamp(36px, 6vw, 52px); line-height: 1.1; margin: 12px 0 12px; letter-spacing: -0.02em; }
-  .tagline { font-size: clamp(18px, 2.4vw, 22px); color: var(--muted); max-width: 620px; margin: 0 auto 28px; }
-  .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+    text-align: center;
+    padding: 84px 0 170px;
+    background:
+      radial-gradient(900px 520px at 12% -8%, rgba(79, 227, 188, .55), transparent 62%),
+      radial-gradient(800px 560px at 105% 8%, rgba(56, 132, 255, .45), transparent 60%),
+      linear-gradient(165deg, #0b5f59 0%, #083f4a 55%, #061f33 100%);
+  }
+  .hero::before, .hero::after {
+    content: ""; position: absolute; border-radius: 50%; filter: blur(60px); opacity: .5; pointer-events: none;
+  }
+  .hero::before { width: 420px; height: 420px; left: -120px; bottom: -160px; background: #2ad0a6; animation: drift 18s ease-in-out infinite alternate; }
+  .hero::after { width: 380px; height: 380px; right: -100px; top: 120px; background: #3a7bff; animation: drift 22s ease-in-out infinite alternate-reverse; }
+  @keyframes drift { to { transform: translate(80px, -60px) scale(1.15); } }
+
+  /* Faint vertical streaks drifting upward, like a page gliding past. */
+  .streaks { position: absolute; inset: 0; pointer-events: none; }
+  .streaks i {
+    position: absolute; bottom: -40%; width: 3px; height: 38%; border-radius: 3px;
+    background: linear-gradient(to top, transparent, rgba(255, 255, 255, .35), transparent);
+    animation: rise linear infinite;
+  }
+  @keyframes rise { to { transform: translateY(-260%); } }
+
+  .hero-inner { position: relative; z-index: 1; }
+  .app-icon {
+    width: 148px; height: 148px; display: block; margin: 0 auto 22px;
+    filter: drop-shadow(0 18px 40px rgba(0, 0, 0, .35)) drop-shadow(0 0 40px rgba(79, 227, 188, .35));
+    animation: float 6s ease-in-out infinite;
+  }
+  @keyframes float { 50% { transform: translateY(-10px); } }
+  .eyebrow {
+    display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    padding: 6px 12px; border-radius: 999px; background: rgba(255, 255, 255, .12);
+    border: 1px solid rgba(255, 255, 255, .22); margin-bottom: 18px;
+  }
+  h1 {
+    font-size: clamp(42px, 7.4vw, 82px); line-height: 1.02; letter-spacing: -0.035em;
+    font-weight: 800; margin: 0 0 18px;
+  }
+  h1 .glide {
+    background: linear-gradient(90deg, #8ff5d8, #4fe3bc 40%, #9fd2ff);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .lede { font-size: clamp(18px, 2.3vw, 22px); max-width: 640px; margin: 0 auto 30px; color: rgba(255, 255, 255, .86); }
+  h1, h2, .lede, .section-head p { text-wrap: balance; }
+  .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
   .btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 12px 22px; border-radius: 12px; font-weight: 600; text-decoration: none;
-    border: 1px solid var(--line); background: var(--surface); color: var(--text);
+    display: inline-flex; align-items: center; gap: 10px; padding: 15px 26px; border-radius: 14px;
+    font-weight: 700; font-size: 17px; text-decoration: none; cursor: pointer; border: 0;
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
   }
-  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .btn.primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
-  @media (prefers-color-scheme: dark) { .btn.primary { color: #062a25; } }
-  .btn:hover { border-color: var(--accent); }
-  .fine { color: var(--muted); font-size: 14px; margin-top: 14px; }
+  .btn svg { width: 20px; height: 20px; flex: none; }
+  .btn-primary { background: #fff; color: #08504b; box-shadow: 0 12px 30px rgba(0, 0, 0, .28); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 38px rgba(0, 0, 0, .34); }
+  .btn-ghost {
+    color: #fff; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .3);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  }
+  .btn-ghost:hover { background: rgba(255, 255, 255, .18); transform: translateY(-2px); }
+  .chips { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 22px; }
+  .chips span {
+    font-size: 14px; padding: 5px 12px; border-radius: 999px;
+    background: rgba(255, 255, 255, .1); color: rgba(255, 255, 255, .88);
+  }
 
-  section { padding: 40px 0; }
-  h2 { font-size: 28px; letter-spacing: -0.01em; margin: 0 0 20px; text-align: center; }
-
-  /* Side-by-side demo: the same page scrolled by a notched wheel, without and with SmoothWheel. */
-  .demo { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  /* ---------- Story demo ---------- */
+  .demo-section { position: relative; z-index: 2; margin-top: -120px; }
+  .demo { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
   .window {
-    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
-    box-shadow: var(--shadow); overflow: hidden;
+    background: var(--surface); border-radius: 16px; overflow: hidden;
+    box-shadow: var(--window-shadow); border: 1px solid var(--line);
   }
-  .window .bar {
-    display: flex; align-items: center; gap: 6px; padding: 10px 14px;
-    border-bottom: 1px solid var(--line); font-size: 14px; color: var(--muted);
+  .window.smooth { box-shadow: var(--window-shadow), 0 0 0 2px rgba(79, 227, 188, .7), 0 0 60px rgba(79, 227, 188, .25); }
+  .titlebar {
+    display: flex; align-items: center; gap: 7px; padding: 12px 14px;
+    border-bottom: 1px solid var(--line); font-size: 14px;
   }
-  .window .bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); display: inline-block; }
-  .window .bar span { margin-left: 8px; font-weight: 600; }
-  .window.smooth .bar span { color: var(--accent); }
-  .viewport { height: 240px; overflow: hidden; position: relative; }
-  .doc { padding: 18px 20px; animation: scroll 5s infinite; will-change: transform; }
-  .notchy .doc { animation-timing-function: steps(6, jump-end); }
-  .smooth .doc { animation-timing-function: cubic-bezier(.45, 0, .25, 1); }
-  @keyframes scroll {
-    0%, 8%   { transform: translateY(0); }
-    46%, 58% { transform: translateY(-390px); }
-    96%, 100% { transform: translateY(0); }
+  .titlebar i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+  .titlebar i:nth-child(1) { background: #ff5f57; }
+  .titlebar i:nth-child(2) { background: #febc2e; }
+  .titlebar i:nth-child(3) { background: #28c840; }
+  .titlebar .label { margin-left: 8px; font-weight: 700; }
+  .window.notchy .label { color: var(--muted); }
+  .window.smooth .label { color: var(--accent); }
+  .clicks {
+    margin-left: auto; font-size: 12px; font-weight: 600; color: var(--muted);
+    padding: 3px 9px; border-radius: 999px; background: var(--accent-soft); font-variant-numeric: tabular-nums;
   }
-  .doc .h { height: 16px; width: 55%; border-radius: 6px; background: var(--demo-bar-strong); margin: 6px 0 16px; }
-  .doc .p { height: 10px; border-radius: 5px; background: var(--demo-bar); margin: 0 0 10px; }
-  .doc .img { height: 90px; border-radius: 10px; background: var(--accent-soft); margin: 16px 0; }
-  @media (prefers-reduced-motion: reduce) { .doc { animation: none; } }
+  .clicks.tick { animation: tick .25s ease-out; }
+  @keyframes tick { 40% { transform: scale(1.18); } }
+  .viewport { height: 340px; overflow: auto; position: relative; }
+  .js .viewport.playing { overflow: hidden; }
+  .viewport::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 40px; pointer-events: none;
+    background: linear-gradient(to bottom, transparent, var(--surface));
+  }
+  .viewport.rewind .story { opacity: 0; }
+  .story {
+    padding: 22px 26px 34px; color: var(--story); will-change: transform; transition: opacity .3s ease;
+    font: 17px/1.65 ui-serif, "New York", Georgia, serif;
+  }
+  .story h3 { font: 700 24px/1.2 ui-serif, "New York", Georgia, serif; margin: 0 0 14px; color: var(--text); }
+  .story p { margin: 0 0 14px; }
+  .story .end { font-weight: 700; color: var(--accent); }
+  .demo-caption { text-align: center; color: var(--muted); margin: 18px 0 0; font-size: 15px; }
+  .replay {
+    font: inherit; font-weight: 600; color: var(--accent); background: none; border: 0; cursor: pointer;
+    padding: 4px 6px; margin-left: 6px; border-radius: 8px;
+  }
+  .replay:hover { background: var(--accent-soft); }
 
-  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  /* ---------- Sections ---------- */
+  section { padding: 72px 0 0; }
+  .section-head { text-align: center; max-width: 640px; margin: 0 auto 32px; }
+  .section-head h2 { font-size: clamp(30px, 4.4vw, 42px); line-height: 1.1; letter-spacing: -0.025em; margin: 0 0 10px; }
+  .section-head p { color: var(--muted); margin: 0; font-size: 18px; }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
   .card {
-    background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 24px;
+    box-shadow: var(--card-shadow); transition: transform .2s ease, box-shadow .2s ease;
   }
-  .card h3 { margin: 0 0 6px; font-size: 17px; }
-  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+  .card:hover { transform: translateY(-4px); }
+  .card .ico {
+    width: 46px; height: 46px; border-radius: 13px; display: grid; place-items: center; margin-bottom: 14px;
+    background: linear-gradient(145deg, #4fe3bc, #0e8f86); color: #fff;
+    box-shadow: 0 8px 20px rgba(14, 143, 134, .3);
+  }
+  .card .ico svg { width: 24px; height: 24px; }
+  .card h3 { margin: 0 0 6px; font-size: 18px; letter-spacing: -0.01em; }
+  .card p { margin: 0; color: var(--muted); font-size: 15.5px; }
 
-  ol.steps { counter-reset: step; list-style: none; padding: 0; margin: 0 auto; max-width: 680px; }
-  ol.steps li {
-    counter-increment: step; position: relative; padding: 0 0 18px 48px;
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; counter-reset: step; }
+  .step { position: relative; padding-top: 58px; }
+  .step::before {
+    counter-increment: step; content: counter(step);
+    position: absolute; top: 22px; left: 24px; width: 36px; height: 36px; border-radius: 50%;
+    display: grid; place-items: center; font-weight: 800; font-size: 16px;
+    background: var(--accent-soft); color: var(--accent);
   }
-  ol.steps li::before {
-    content: counter(step); position: absolute; left: 0; top: 0;
-    width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
-    background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 15px;
-  }
-  .note {
-    max-width: 680px; margin: 8px auto 0; padding: 14px 16px; border-radius: 12px;
-    background: var(--surface); border: 1px solid var(--line); color: var(--muted); font-size: 15px;
+  .step p { color: var(--text); font-size: 15.5px; }
+  .why {
+    max-width: 760px; margin: 22px auto 0; padding: 16px 20px; border-radius: 14px; font-size: 15px;
+    color: var(--muted); background: var(--surface); border: 1px dashed var(--line); text-align: center;
   }
 
-  .faq { max-width: 680px; margin: 0 auto; }
-  details { border-bottom: 1px solid var(--line); padding: 14px 0; }
-  summary { cursor: pointer; font-weight: 600; }
+  .faq { max-width: 720px; margin: 0 auto; }
+  details { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 20px; margin-bottom: 12px; }
+  summary { cursor: pointer; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; color: var(--accent); font-weight: 800; font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: "–"; }
   details p { color: var(--muted); margin: 10px 0 0; }
 
-  footer { text-align: center; color: var(--muted); font-size: 14px; padding: 40px 0 56px; }
+  .final {
+    margin: 80px 0 0; padding: 64px 24px; border-radius: 28px; text-align: center; color: #fff;
+    position: relative; overflow: hidden;
+    background:
+      radial-gradient(600px 300px at 0% 0%, rgba(79, 227, 188, .5), transparent 60%),
+      radial-gradient(600px 300px at 100% 100%, rgba(56, 132, 255, .4), transparent 60%),
+      linear-gradient(135deg, #0b5f59, #062a3a);
+  }
+  .final h2 { font-size: clamp(32px, 5vw, 52px); letter-spacing: -0.03em; line-height: 1.05; margin: 0 0 12px; }
+  .final p { color: rgba(255, 255, 255, .82); margin: 0 0 26px; font-size: 18px; }
 
-  @media (max-width: 760px) {
-    header { padding-top: 48px; }
+  footer { text-align: center; color: var(--muted); font-size: 14px; padding: 48px 0 56px; }
+  footer p { margin: 4px 0; }
+
+  /* Fade sections in as they scroll into view (only when JavaScript is on). */
+  .js .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+  .js .reveal.in { opacity: 1; transform: none; }
+
+  @media (max-width: 860px) {
     .demo { grid-template-columns: 1fr; }
-    .features { grid-template-columns: 1fr; }
+    .features { grid-template-columns: 1fr 1fr; }
+    .steps { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 560px) {
+    .hero { padding: 56px 0 150px; }
+    .features, .steps { grid-template-columns: 1fr; }
+    .viewport { height: 300px; }
+    .story { padding: 18px 20px 30px; font-size: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero::before, .hero::after, .streaks i, .app-icon { animation: none; }
+    .js .reveal { opacity: 1; transform: none; transition: none; }
   }
 </style>
 </head>
 <body>
-<div class="wrap">
 
-<header>
-  <img src="icon.png" alt="SmoothWheel icon" width="128" height="128">
-  <h1>SmoothWheel</h1>
-  <p class="tagline">Smooth, trackpad-style scrolling for any notched mouse wheel on your Mac. Free and open source.</p>
-  <div class="buttons">
-    <a class="btn primary" href="https://github.com/hloog0/SmoothWheel/releases/latest/download/SmoothWheel.zip">Download for Mac</a>
-    <a class="btn" href="https://github.com/hloog0/SmoothWheel">View on GitHub</a>
+<header class="hero">
+  <div class="streaks" aria-hidden="true">
+    <i style="left:8%;animation-duration:7s;animation-delay:-2s"></i>
+    <i style="left:19%;animation-duration:9s;animation-delay:-6s"></i>
+    <i style="left:31%;animation-duration:6.5s;animation-delay:-1s"></i>
+    <i style="left:72%;animation-duration:8s;animation-delay:-4s"></i>
+    <i style="left:84%;animation-duration:6s;animation-delay:-3s"></i>
+    <i style="left:93%;animation-duration:9.5s;animation-delay:-7s"></i>
   </div>
-  <p class="fine">macOS 15 or later · Apple Silicon &amp; Intel · MIT license</p>
+  <div class="wrap hero-inner">
+    <img class="app-icon" src="icon.png" alt="SmoothWheel app icon" width="148" height="148">
+    <span class="eyebrow">Free &amp; open source · for Mac</span>
+    <h1>Make your mouse wheel <span class="glide">glide.</span></h1>
+    <p class="lede">SmoothWheel turns every click of a notched scroll wheel into smooth, trackpad-style scrolling. No stairs. No lurching. No price tag.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="https://github.com/hloog0/SmoothWheel/releases/latest/download/SmoothWheel.zip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
+        Download for Mac
+      </a>
+      <a class="btn btn-ghost" href="https://github.com/hloog0/SmoothWheel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 7-5 5 5 5m8-10 5 5-5 5"/></svg>
+        Source on GitHub
+      </a>
+    </div>
+    <div class="chips"><span>macOS 15+</span><span>Apple Silicon &amp; Intel</span><span>No account, no tracking</span></div>
+  </div>
 </header>
 
-<section aria-labelledby="demo-title">
-  <h2 id="demo-title">The same scroll, two ways</h2>
-  <div class="demo" aria-hidden="true">
+<main class="wrap">
+
+<section class="demo-section" aria-labelledby="demo-title">
+  <h2 id="demo-title" class="sr-only" style="position:absolute;left:-9999px">A short story, told two ways</h2>
+  <div class="demo">
     <div class="window notchy">
-      <div class="bar"><i></i><i></i><i></i><span>Without SmoothWheel</span></div>
-      <div class="viewport"><div class="doc">
-        <div class="h"></div>
-        <div class="p" style="width:96%"></div><div class="p" style="width:88%"></div><div class="p" style="width:92%"></div><div class="p" style="width:60%"></div>
-        <div class="img"></div>
-        <div class="p" style="width:94%"></div><div class="p" style="width:85%"></div><div class="p" style="width:90%"></div><div class="p" style="width:72%"></div>
-        <div class="h" style="width:40%"></div>
-        <div class="p" style="width:91%"></div><div class="p" style="width:97%"></div><div class="p" style="width:83%"></div><div class="p" style="width:66%"></div>
-        <div class="img"></div>
-        <div class="p" style="width:89%"></div><div class="p" style="width:93%"></div><div class="p" style="width:58%"></div>
-      </div></div>
+      <div class="titlebar"><i></i><i></i><i></i><span class="label">Without SmoothWheel</span><span class="clicks">0 clicks</span></div>
+      <div class="viewport"><article class="story">
+        <h3>The Mouse Who Wanted to Glide</h3>
+        <p>On a tidy desk in a slightly messy dorm room lived a mouse named Notch.</p>
+        <p>Notch was a good mouse. Reliable. Clicky. He had survived three group projects and one very long essay. But every time he turned his wheel, the page lurched. <em>Click.</em> Jump. <em>Click.</em> Jump. Like climbing stairs in the dark.</p>
+        <p>Beside him, built into the laptop, lived Pad the trackpad. Pad didn't click. Pad <em>glided</em>. Pages poured under Pad like warm syrup, and Pad never let anyone forget it.</p>
+        <p>“Have you tried,” Pad said one evening, “just being smoother?”</p>
+        <p>Notch tried. He polished his wheel with lip balm. He spun faster, which only flung the page three paragraphs at a time. He spun slower, which made the page climb the stairs very politely.</p>
+        <p>Their student squinted at the screen and sighed. “I'll just buy one of those smooth-scrolling apps,” they said. Then they saw the price, and quietly closed the tab.</p>
+        <p>That night, something small blinked in the menu bar.</p>
+        <p>“Psst,” it said. “Give me your clicks.”</p>
+        <p>“All of them?” asked Notch.</p>
+        <p>“Every one. I'll turn each click into a glide: a gentle push, a soft landing. Spin fast and I'll carry you farther. Stop, and I'll stop with you. Pad can keep doing Pad things.”</p>
+        <p>“What does it cost?”</p>
+        <p>“Nothing. I'm free. You can even read my whole recipe.”</p>
+        <p>So Notch turned his wheel. <em>Click</em>, and the page slid like a sled on fresh snow. <em>Click, click, click</em>, and it flowed like a river that knew exactly where it was going.</p>
+        <p>Pad was quiet for a long moment. “Huh,” said Pad.</p>
+        <p>The student stopped squinting. Notch stopped feeling like a staircase. And when Notch stopped spinning, the page stopped too, right where he meant it to.</p>
+        <p class="end">The end. Now go scroll something.</p>
+      </article></div>
     </div>
     <div class="window smooth">
-      <div class="bar"><i></i><i></i><i></i><span>With SmoothWheel</span></div>
-      <div class="viewport"><div class="doc">
-        <div class="h"></div>
-        <div class="p" style="width:96%"></div><div class="p" style="width:88%"></div><div class="p" style="width:92%"></div><div class="p" style="width:60%"></div>
-        <div class="img"></div>
-        <div class="p" style="width:94%"></div><div class="p" style="width:85%"></div><div class="p" style="width:90%"></div><div class="p" style="width:72%"></div>
-        <div class="h" style="width:40%"></div>
-        <div class="p" style="width:91%"></div><div class="p" style="width:97%"></div><div class="p" style="width:83%"></div><div class="p" style="width:66%"></div>
-        <div class="img"></div>
-        <div class="p" style="width:89%"></div><div class="p" style="width:93%"></div><div class="p" style="width:58%"></div>
-      </div></div>
+      <div class="titlebar"><i></i><i></i><i></i><span class="label">With SmoothWheel</span><span class="clicks">0 clicks</span></div>
+      <div class="viewport"><noscript><p class="story">Turn on JavaScript to watch the demo.</p></noscript></div>
+    </div>
+  </div>
+  <p class="demo-caption">Same story, same wheel clicks. One climbs stairs; the other glides. <button class="replay" type="button">↻ Replay</button></p>
+</section>
+
+<section class="reveal" aria-labelledby="features-title">
+  <div class="section-head">
+    <h2 id="features-title">Small app. Big difference.</h2>
+    <p>It lives in your menu bar and quietly fixes the one thing your mouse wheel was never good at.</p>
+  </div>
+  <div class="features">
+    <div class="card">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 15c3 0 3-6 6-6s3 6 6 6 3-6 6-6"/></svg></div>
+      <h3>Glides, doesn't jump</h3>
+      <p>Each click becomes a short, eased animation. Keep spinning and the clicks blend into one continuous glide.</p>
+    </div>
+    <div class="card">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 12h11m0 0v-5m0 5v5M19 6v12"/></svg></div>
+      <h3>Stops when you stop</h3>
+      <p>“Glide after you stop” sets how quickly scrolling settles, from a crisp halt to a long, lazy coast.</p>
+    </div>
+    <div class="card">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 7 5 5-5 5m7-10 5 5-5 5"/></svg></div>
+      <h3>Speeds up when you spin</h3>
+      <p>Flick the wheel and it takes bigger steps, so long pages still fly by.</p>
+    </div>
+    <div class="card">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="5" width="16" height="12" rx="2.5"/><path d="M9 20h6"/></svg></div>
+      <h3>Leaves your trackpad alone</h3>
+      <p>Trackpad and Magic Mouse gestures pass straight through, exactly as before.</p>
+    </div>
+    <div class="card">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="8" width="18" height="8" rx="4"/><circle cx="16" cy="12" r="2"/></svg></div>
+      <h3>Off where you want it off</h3>
+      <p>Switch it off for a single app, or everywhere, right from the menu bar.</p>
+    </div>
+    <div class="card">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6l-7-3z"/><path d="m9 12 2 2 4-4"/></svg></div>
+      <h3>Private and tiny</h3>
+      <p>No accounts, no network access, nothing collected. Under a megabyte, and no Dock icon.</p>
     </div>
   </div>
 </section>
 
-<section aria-labelledby="features-title">
-  <h2 id="features-title">What it does</h2>
-  <div class="features">
-    <div class="card"><h3>Glides, doesn't jump</h3><p>Each wheel notch becomes a short, eased animation, and a spinning wheel becomes one continuous glide.</p></div>
-    <div class="card"><h3>Stops when you stop</h3><p>"Glide after you stop" sets how quickly scrolling settles, from a crisp stop to a long coast.</p></div>
-    <div class="card"><h3>Speeds up when you spin</h3><p>Fast spins take bigger steps, so long pages are still quick to get through.</p></div>
-    <div class="card"><h3>Leaves your trackpad alone</h3><p>Trackpad and Magic Mouse gestures pass straight through untouched.</p></div>
-    <div class="card"><h3>Off where you want it off</h3><p>Turn smoothing off in specific apps, or turn it off entirely, from the menu bar.</p></div>
-    <div class="card"><h3>Private and tiny</h3><p>No accounts, no network access, nothing collected. It's a small menu bar app with no Dock icon.</p></div>
+<section class="reveal" aria-labelledby="install-title">
+  <div class="section-head">
+    <h2 id="install-title">Up and gliding in a minute</h2>
+    <p>Four steps, once.</p>
   </div>
+  <div class="steps">
+    <div class="card step"><p><a href="https://github.com/hloog0/SmoothWheel/releases/latest/download/SmoothWheel.zip"><strong>Download SmoothWheel.zip</strong></a> and double-click it to unzip.</p></div>
+    <div class="card step"><p>Drag <strong>SmoothWheel</strong> into your <strong>Applications</strong> folder.</p></div>
+    <div class="card step"><p>Open it. When macOS says it couldn't verify the app, click <strong>Done</strong>, then <strong>System Settings → Privacy &amp; Security → Open Anyway</strong>.</p></div>
+    <div class="card step"><p>Turn on <strong>SmoothWheel</strong> under <strong>Privacy &amp; Security → Accessibility</strong>. Then just scroll.</p></div>
+  </div>
+  <p class="why">Why the warning? Apple charges developers a yearly fee to skip it. SmoothWheel is free, so it doesn't pay that toll. Its full source is <a href="https://github.com/hloog0/SmoothWheel">on GitHub</a> for anyone to read or build.</p>
 </section>
 
-<section aria-labelledby="install-title">
-  <h2 id="install-title">Install</h2>
-  <ol class="steps">
-    <li><a href="https://github.com/hloog0/SmoothWheel/releases/latest/download/SmoothWheel.zip">Download SmoothWheel.zip</a> and double-click it to unzip.</li>
-    <li>Drag <strong>SmoothWheel</strong> into your <strong>Applications</strong> folder.</li>
-    <li>Open it. When macOS says it couldn't verify the app, click <strong>Done</strong>. Then go to <strong>System Settings → Privacy &amp; Security</strong>, scroll down and click <strong>Open Anyway</strong>. You only need to do this once.</li>
-    <li>Turn on <strong>SmoothWheel</strong> under <strong>System Settings → Privacy &amp; Security → Accessibility</strong>, then click the mouse icon in the menu bar to adjust it.</li>
-  </ol>
-  <p class="note">Why the warning? Apple charges developers a yearly fee to sign apps so macOS opens them without asking. SmoothWheel is free, so it isn't signed that way. Its full source code is <a href="https://github.com/hloog0/SmoothWheel">on GitHub</a>, so you can read it or build it yourself.</p>
-</section>
-
-<section aria-labelledby="faq-title">
-  <h2 id="faq-title">Questions</h2>
+<section class="reveal" aria-labelledby="faq-title">
+  <div class="section-head"><h2 id="faq-title">Questions</h2></div>
   <div class="faq">
     <details>
       <summary>Which mice does it work with?</summary>
@@ -214,7 +378,7 @@
     </details>
     <details>
       <summary>Is it really free?</summary>
-      <p>Yes. It's open source under the MIT license: free to use, share and modify.</p>
+      <p>Yes, completely. It's open source under the MIT license: free to use, share and modify.</p>
     </details>
     <details>
       <summary>How do I uninstall it?</summary>
@@ -223,11 +387,109 @@
   </div>
 </section>
 
-<footer>
+<div class="final reveal">
+  <h2>Stop scrolling in stairs.</h2>
+  <p>Free forever. Takes a minute to set up.</p>
+  <a class="btn btn-primary" href="https://github.com/hloog0/SmoothWheel/releases/latest/download/SmoothWheel.zip">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
+    Download SmoothWheel
+  </a>
+</div>
+
+</main>
+
+<footer class="wrap">
   <p>MIT License · © 2026 Steve Liang · <a href="https://github.com/hloog0/SmoothWheel">Source on GitHub</a></p>
   <p>SmoothWheel is an independent project, not affiliated with Logitech or Apple.</p>
 </footer>
 
-</div>
+<script>
+// The demo: both windows get the same schedule of wheel clicks. The left one jumps a fixed
+// step per click; the right one eases each click over 400 ms with SmoothWheel's own curve.
+(() => {
+  const notchyWin = document.querySelector(".window.notchy");
+  const smoothWin = document.querySelector(".window.smooth");
+  const notchyView = notchyWin.querySelector(".viewport");
+  const smoothView = smoothWin.querySelector(".viewport");
+  const notchyStory = notchyView.querySelector(".story");
+  smoothView.replaceChildren(notchyStory.cloneNode(true));
+  const smoothStory = smoothView.querySelector(".story");
+  const counters = [notchyWin, smoothWin].map(w => w.querySelector(".clicks"));
+
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  // Bursts of clicks, the way people actually spin a wheel: a few quick clicks, a pause to read.
+  const bursts = [3, 4, 3, 5, 3, 4, 3, 4, 3];
+  const clicks = [];
+  bursts.forEach((count, b) => {
+    for (let i = 0; i < count; i++) clicks.push(1.2 + b * 2.4 + i * 0.09);
+  });
+  const animation = 0.4;
+  const loop = clicks[clicks.length - 1] + 3.4;
+  const ease = u => u <= 0 ? 0 : u >= 1 ? 1 : 1 - Math.pow(1 - u, 5) * (1 + 5 * u);
+
+  let step = 0;
+  const measure = () => {
+    step = Math.max(notchyStory.scrollHeight - notchyView.clientHeight, 0) / clicks.length;
+  };
+
+  let elapsed = 0, last = null, frame = 0, running = false, shown = -1;
+  const render = t => {
+    let count = 0, glide = 0;
+    for (const at of clicks) {
+      if (t < at) break;
+      count++;
+      glide += ease((t - at) / animation);
+    }
+    notchyStory.style.transform = `translateY(${-Math.round(count * step)}px)`;
+    smoothStory.style.transform = `translateY(${-glide * step}px)`;
+    if (count !== shown) {
+      shown = count;
+      for (const c of counters) {
+        c.textContent = `${count} click${count === 1 ? "" : "s"}`;
+        if (count > 0) { c.classList.remove("tick"); void c.offsetWidth; c.classList.add("tick"); }
+      }
+    }
+    const rewinding = t > loop - 0.35;
+    notchyView.classList.toggle("rewind", rewinding);
+    smoothView.classList.toggle("rewind", rewinding);
+  };
+  const tick = now => {
+    if (last !== null) elapsed += Math.min(now - last, 100) / 1000;
+    last = now;
+    if (elapsed > loop) elapsed = 0;
+    render(elapsed);
+    frame = requestAnimationFrame(tick);
+  };
+  const play = () => {
+    if (running) return;
+    running = true;
+    last = null;
+    frame = requestAnimationFrame(tick);
+  };
+  const pause = () => { running = false; cancelAnimationFrame(frame); };
+
+  for (const v of [notchyView, smoothView]) { v.classList.add("playing"); v.scrollTop = 0; }
+  measure();
+  addEventListener("resize", measure);
+  document.fonts?.ready.then(measure);
+
+  // Only run while the demo is on screen.
+  new IntersectionObserver(([entry]) => entry.isIntersecting ? play() : pause(), { threshold: 0.2 })
+    .observe(document.querySelector(".demo"));
+
+  document.querySelector(".replay").addEventListener("click", () => { elapsed = 0; render(0); play(); });
+})();
+
+// Fade sections in as they arrive.
+(() => {
+  const items = document.querySelectorAll(".reveal");
+  if (!("IntersectionObserver" in window)) { items.forEach(el => el.classList.add("in")); return; }
+  const io = new IntersectionObserver(entries => {
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+  }, { threshold: 0.12 });
+  items.forEach(el => io.observe(el));
+})();
+</script>
 </body>
 </html>
