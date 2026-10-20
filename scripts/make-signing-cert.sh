@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Creates a self-signed code-signing certificate, "SmoothWheel Local", in your login keychain.
+# Creates a self-signed code-signing certificate, "Mousse Local", in your login keychain.
 # build.sh signs with it automatically, so every build has the same identity and macOS keeps
-# SmoothWheel's Accessibility permission across rebuilds. It isn't trusted by anything and
+# Mousse's Accessibility permission across rebuilds. It isn't trusted by anything and
 # doesn't need to be: macOS only checks that each build is signed by the same key.
 # Optional. Remove it any time in Keychain Access (login keychain → My Certificates).
 set -euo pipefail
 
-NAME="SmoothWheel Local"
+NAME="Mousse Local"
 if security find-identity -p codesigning 2>/dev/null | grep -q "\"$NAME\""; then
   echo "\"$NAME\" already exists."
   exit 0

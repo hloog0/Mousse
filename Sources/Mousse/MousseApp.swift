@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct SmoothWheelApp: App {
+struct MousseApp: App {
     // Plain `let`, not @State: the App is created once, and SwiftUI's macro plugins
     // (which @State needs) only ship with full Xcode, not the Command Line Tools.
     private let controller = AppController()
@@ -14,7 +14,7 @@ struct SmoothWheelApp: App {
         }
         .menuBarExtraStyle(.window)
 
-        Window("SmoothWheel", id: "settings") {
+        Window("Mousse", id: "settings") {
             SettingsView(settings: controller.settings, permissions: controller.permissions)
         }
         .windowResizability(.contentSize)

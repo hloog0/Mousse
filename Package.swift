@@ -2,17 +2,17 @@
 import PackageDescription
 
 let package = Package(
-    name: "SmoothWheel",
+    name: "Mousse",
     platforms: [.macOS(.v15)],
     targets: [
         // Pure logic (easing + event classification/synthesis): testable without permissions.
-        .target(name: "SmoothWheelCore"),
+        .target(name: "MousseCore"),
         // The menu bar app. Swift 5 mode keeps the C event-tap callback and AppKit glue simple.
         .executableTarget(
-            name: "SmoothWheel",
-            dependencies: ["SmoothWheelCore"],
+            name: "Mousse",
+            dependencies: ["MousseCore"],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
-        .testTarget(name: "SmoothWheelCoreTests", dependencies: ["SmoothWheelCore"]),
+        .testTarget(name: "MousseCoreTests", dependencies: ["MousseCore"]),
     ]
 )

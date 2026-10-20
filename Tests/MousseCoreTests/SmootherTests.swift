@@ -1,5 +1,5 @@
 import Testing
-@testable import SmoothWheelCore
+@testable import MousseCore
 
 struct SmootherTests {
     /// Runs the smoother to rest, returning every step and the elapsed time.

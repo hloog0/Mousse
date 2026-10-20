@@ -1,6 +1,6 @@
 import AppKit
 import QuartzCore
-import SmoothWheelCore
+import MousseCore
 
 /// Drives the `Smoother` from the display's refresh and posts the resulting
 /// trackpad-style scroll events. Idle (display link paused) whenever nothing is moving.

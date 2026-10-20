@@ -3,7 +3,7 @@ import CoreGraphics
 /// Classifies incoming scroll-wheel events and builds the smooth replacements we post.
 public enum WheelEvents {
     /// Stamped into `eventSourceUserData` on everything we post, so our own tap lets it through.
-    public static let marker: Int64 = 0x534D_5748 // "SMWH"
+    public static let marker: Int64 = 0x4D4F_5553 // "MOUS"
 
     public enum Decision: Equatable, Sendable {
         /// Leave the event alone (trackpad, Magic Mouse, our own output, or nothing to scroll).

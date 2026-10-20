@@ -9,7 +9,7 @@ struct SettingsView: View {
         Form {
             if !permissions.trusted {
                 Section {
-                    Label("SmoothWheel needs Accessibility access to take over the mouse wheel.",
+                    Label("Mousse needs Accessibility access to take over the mouse wheel.",
                           systemImage: "exclamationmark.triangle.fill")
                     Button("Open Privacy & Security…") { permissions.openSettings() }
                 }

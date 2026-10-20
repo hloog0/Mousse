@@ -1,7 +1,7 @@
 import Foundation
 import ServiceManagement
 
-/// User preferences, persisted in UserDefaults (domain com.steve.smoothwheel).
+/// User preferences, persisted in UserDefaults (domain io.github.hloog0.mousse).
 @MainActor
 @Observable
 final class Settings {
@@ -27,6 +27,7 @@ final class Settings {
     @ObservationIgnored private let defaults = UserDefaults.standard
 
     init() {
+        Self.migrateFromSmoothWheel()
         defaults.register(defaults: [
             "enabled": true,
             "stopGlideMs": 150.0,
@@ -43,6 +44,20 @@ final class Settings {
         accelerationMax = defaults.double(forKey: "accelerationMax")
         shiftHorizontal = defaults.bool(forKey: "shiftHorizontal")
         excludedBundleIDs = defaults.stringArray(forKey: "excludedBundleIDs") ?? []
+    }
+
+    /// Before 1.1 the app was called SmoothWheel (bundle com.steve.smoothwheel). Bring its
+    /// settings across once, without overwriting anything already set here.
+    private static func migrateFromSmoothWheel() {
+        let defaults = UserDefaults.standard
+        guard !defaults.bool(forKey: "migratedFromSmoothWheel"),
+              let old = UserDefaults(suiteName: "com.steve.smoothwheel") else { return }
+        let keys = ["enabled", "stopGlideMs", "stepSize", "animationMs", "accelerationMax",
+                    "shiftHorizontal", "excludedBundleIDs"]
+        for key in keys where defaults.object(forKey: key) == nil {
+            if let value = old.object(forKey: key) { defaults.set(value, forKey: key) }
+        }
+        defaults.set(true, forKey: "migratedFromSmoothWheel")
     }
 
     /// Seconds for the smoother, or nil for a full glide.

@@ -1,4 +1,4 @@
-// Draws the SmoothWheel app icon with Core Graphics and writes:
+// Draws the Mousse app icon with Core Graphics and writes:
 //   Resources/AppIcon.icns   bundled into the app by build.sh
 //   docs/icon.png            256 px copy for the README
 // Run from the repo root:  swift scripts/make-icon.swift

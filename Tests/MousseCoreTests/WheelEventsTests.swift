@@ -1,6 +1,6 @@
 import CoreGraphics
 import Testing
-@testable import SmoothWheelCore
+@testable import MousseCore
 
 struct WheelEventsTests {
     /// What a plain notched wheel produces: line units, not continuous.
@@ -13,6 +13,7 @@ struct WheelEventsTests {
     /// A continuous pixel scroll with the given gesture phases (0 = none).
     private func pixelScroll(dy: Int32, phase: Int64 = 0, momentum: Int64 = 0) -> CGEvent {
         let e = CGEvent(scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 1, wheel1: dy, wheel2: 0, wheel3: 0)!
+        e.flags = [] // new events can inherit system flag bits (e.g. non-coalesced); keep the test exact
         e.setIntegerValueField(.scrollWheelEventIsContinuous, value: 1)
         e.setIntegerValueField(.scrollWheelEventScrollPhase, value: phase)
         e.setIntegerValueField(.scrollWheelEventMomentumPhase, value: momentum)

@@ -1,6 +1,6 @@
 import AppKit
 import QuartzCore
-import SmoothWheelCore
+import MousseCore
 
 /// Wires the event tap to the engine and owns the app's state.
 @MainActor
