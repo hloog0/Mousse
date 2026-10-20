@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SmoothWheel: smooth mouse scrolling for Mac</title>
+<meta name="description" content="Free, open-source menu bar app that gives any notched mouse wheel smooth, trackpad-style scrolling on macOS.">
+<meta property="og:title" content="SmoothWheel: smooth mouse scrolling for Mac">
+<meta property="og:description" content="Free, open-source menu bar app that gives any notched mouse wheel smooth, trackpad-style scrolling on macOS.">
+<meta property="og:image" content="https://hloog0.github.io/SmoothWheel/icon.png">
+<meta property="og:url" content="https://hloog0.github.io/SmoothWheel/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" type="image/png" href="icon.png">
+<style>
+  :root {
+    --bg: #f7f8f9;
+    --surface: #ffffff;
+    --text: #15171a;
+    --muted: #5d636b;
+    --line: #e3e6ea;
+    --accent: #0e8f86;
+    --accent-strong: #0a7770;
+    --accent-soft: #e2f6f1;
+    --demo-bar: #d9dee4;
+    --demo-bar-strong: #b9c1ca;
+    --shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111315;
+      --surface: #1a1d20;
+      --text: #eceef0;
+      --muted: #9aa1a9;
+      --line: #2a2e33;
+      --accent: #3fd6b0;
+      --accent-strong: #63e3c3;
+      --accent-soft: #15302b;
+      --demo-bar: #30353b;
+      --demo-bar-strong: #454c54;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 17px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  }
+  a { color: var(--accent); }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  header { text-align: center; padding: 72px 0 40px; }
+  header img { width: 128px; height: 128px; }
+  h1 { font-size: clamp(36px, 6vw, 52px); line-height: 1.1; margin: 12px 0 12px; letter-spacing: -0.02em; }
+  .tagline { font-size: clamp(18px, 2.4vw, 22px); color: var(--muted); max-width: 620px; margin: 0 auto 28px; }
+  .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 22px; border-radius: 12px; font-weight: 600; text-decoration: none;
+    border: 1px solid var(--line); background: var(--surface); color: var(--text);
+  }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+  @media (prefers-color-scheme: dark) { .btn.primary { color: #062a25; } }
+  .btn:hover { border-color: var(--accent); }
+  .fine { color: var(--muted); font-size: 14px; margin-top: 14px; }
+
+  section { padding: 40px 0; }
+  h2 { font-size: 28px; letter-spacing: -0.01em; margin: 0 0 20px; text-align: center; }
+
+  /* Side-by-side demo: the same page scrolled by a notched wheel, without and with SmoothWheel. */
+  .demo { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .window {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .window .bar {
+    display: flex; align-items: center; gap: 6px; padding: 10px 14px;
+    border-bottom: 1px solid var(--line); font-size: 14px; color: var(--muted);
+  }
+  .window .bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); display: inline-block; }
+  .window .bar span { margin-left: 8px; font-weight: 600; }
+  .window.smooth .bar span { color: var(--accent); }
+  .viewport { height: 240px; overflow: hidden; position: relative; }
+  .doc { padding: 18px 20px; animation: scroll 5s infinite; will-change: transform; }
+  .notchy .doc { animation-timing-function: steps(6, jump-end); }
+  .smooth .doc { animation-timing-function: cubic-bezier(.45, 0, .25, 1); }
+  @keyframes scroll {
+    0%, 8%   { transform: translateY(0); }
+    46%, 58% { transform: translateY(-390px); }
+    96%, 100% { transform: translateY(0); }
+  }
+  .doc .h { height: 16px; width: 55%; border-radius: 6px; background: var(--demo-bar-strong); margin: 6px 0 16px; }
+  .doc .p { height: 10px; border-radius: 5px; background: var(--demo-bar); margin: 0 0 10px; }
+  .doc .img { height: 90px; border-radius: 10px; background: var(--accent-soft); margin: 16px 0; }
+  @media (prefers-reduced-motion: reduce) { .doc { animation: none; } }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px;
+  }
+  .card h3 { margin: 0 0 6px; font-size: 17px; }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  ol.steps { counter-reset: step; list-style: none; padding: 0; margin: 0 auto; max-width: 680px; }
+  ol.steps li {
+    counter-increment: step; position: relative; padding: 0 0 18px 48px;
+  }
+  ol.steps li::before {
+    content: counter(step); position: absolute; left: 0; top: 0;
+    width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 15px;
+  }
+  .note {
+    max-width: 680px; margin: 8px auto 0; padding: 14px 16px; border-radius: 12px;
+    background: var(--surface); border: 1px solid var(--line); color: var(--muted); font-size: 15px;
+  }
+
+  .faq { max-width: 680px; margin: 0 auto; }
+  details { border-bottom: 1px solid var(--line); padding: 14px 0; }
+  summary { cursor: pointer; font-weight: 600; }
+  details p { color: var(--muted); margin: 10px 0 0; }
+
+  footer { text-align: center; color: var(--muted); font-size: 14px; padding: 40px 0 56px; }
+
+  @media (max-width: 760px) {
+    header { padding-top: 48px; }
+    .demo { grid-template-columns: 1fr; }
+    .features { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <img src="icon.png" alt="SmoothWheel icon" width="128" height="128">
+  <h1>SmoothWheel</h1>
+  <p class="tagline">Smooth, trackpad-style scrolling for any notched mouse wheel on your Mac. Free and open source.</p>
+  <div class="buttons">
+    <a class="btn primary" href="https://github.com/hloog0/SmoothWheel/releases/latest/download/SmoothWheel.zip">Download for Mac</a>
+    <a class="btn" href="https://github.com/hloog0/SmoothWheel">View on GitHub</a>
+  </div>
+  <p class="fine">macOS 15 or later · Apple Silicon &amp; Intel · MIT license</p>
+</header>
+
+<section aria-labelledby="demo-title">
+  <h2 id="demo-title">The same scroll, two ways</h2>
+  <div class="demo" aria-hidden="true">
+    <div class="window notchy">
+      <div class="bar"><i></i><i></i><i></i><span>Without SmoothWheel</span></div>
+      <div class="viewport"><div class="doc">
+        <div class="h"></div>
+        <div class="p" style="width:96%"></div><div class="p" style="width:88%"></div><div class="p" style="width:92%"></div><div class="p" style="width:60%"></div>
+        <div class="img"></div>
+        <div class="p" style="width:94%"></div><div class="p" style="width:85%"></div><div class="p" style="width:90%"></div><div class="p" style="width:72%"></div>
+        <div class="h" style="width:40%"></div>
+        <div class="p" style="width:91%"></div><div class="p" style="width:97%"></div><div class="p" style="width:83%"></div><div class="p" style="width:66%"></div>
+        <div class="img"></div>
+        <div class="p" style="width:89%"></div><div class="p" style="width:93%"></div><div class="p" style="width:58%"></div>
+      </div></div>
+    </div>
+    <div class="window smooth">
+      <div class="bar"><i></i><i></i><i></i><span>With SmoothWheel</span></div>
+      <div class="viewport"><div class="doc">
+        <div class="h"></div>
+        <div class="p" style="width:96%"></div><div class="p" style="width:88%"></div><div class="p" style="width:92%"></div><div class="p" style="width:60%"></div>
+        <div class="img"></div>
+        <div class="p" style="width:94%"></div><div class="p" style="width:85%"></div><div class="p" style="width:90%"></div><div class="p" style="width:72%"></div>
+        <div class="h" style="width:40%"></div>
+        <div class="p" style="width:91%"></div><div class="p" style="width:97%"></div><div class="p" style="width:83%"></div><div class="p" style="width:66%"></div>
+        <div class="img"></div>
+        <div class="p" style="width:89%"></div><div class="p" style="width:93%"></div><div class="p" style="width:58%"></div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="features-title">
+  <h2 id="features-title">What it does</h2>
+  <div class="features">
+    <div class="card"><h3>Glides, doesn't jump</h3><p>Each wheel notch becomes a short, eased animation, and a spinning wheel becomes one continuous glide.</p></div>
+    <div class="card"><h3>Stops when you stop</h3><p>"Glide after you stop" sets how quickly scrolling settles, from a crisp stop to a long coast.</p></div>
+    <div class="card"><h3>Speeds up when you spin</h3><p>Fast spins take bigger steps, so long pages are still quick to get through.</p></div>
+    <div class="card"><h3>Leaves your trackpad alone</h3><p>Trackpad and Magic Mouse gestures pass straight through untouched.</p></div>
+    <div class="card"><h3>Off where you want it off</h3><p>Turn smoothing off in specific apps, or turn it off entirely, from the menu bar.</p></div>
+    <div class="card"><h3>Private and tiny</h3><p>No accounts, no network access, nothing collected. It's a small menu bar app with no Dock icon.</p></div>
+  </div>
+</section>
+
+<section aria-labelledby="install-title">
+  <h2 id="install-title">Install</h2>
+  <ol class="steps">
+    <li><a href="https://github.com/hloog0/SmoothWheel/releases/latest/download/SmoothWheel.zip">Download SmoothWheel.zip</a> and double-click it to unzip.</li>
+    <li>Drag <strong>SmoothWheel</strong> into your <strong>Applications</strong> folder.</li>
+    <li>Open it. When macOS says it couldn't verify the app, click <strong>Done</strong>. Then go to <strong>System Settings → Privacy &amp; Security</strong>, scroll down and click <strong>Open Anyway</strong>. You only need to do this once.</li>
+    <li>Turn on <strong>SmoothWheel</strong> under <strong>System Settings → Privacy &amp; Security → Accessibility</strong>, then click the mouse icon in the menu bar to adjust it.</li>
+  </ol>
+  <p class="note">Why the warning? Apple charges developers a yearly fee to sign apps so macOS opens them without asking. SmoothWheel is free, so it isn't signed that way. Its full source code is <a href="https://github.com/hloog0/SmoothWheel">on GitHub</a>, so you can read it or build it yourself.</p>
+</section>
+
+<section aria-labelledby="faq-title">
+  <h2 id="faq-title">Questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Which mice does it work with?</summary>
+      <p>Any mouse with a notched scroll wheel. It was built for and tested with the Logitech Signature M750. If your mouse software has its own smooth scrolling option, turn that off so the two don't stack.</p>
+    </details>
+    <details>
+      <summary>Why does it need Accessibility access?</summary>
+      <p>That's the only way macOS lets an app intercept scroll events and replace them with smooth ones. SmoothWheel only listens to scroll-wheel events. It never sees keystrokes or clicks and never sends anything anywhere.</p>
+    </details>
+    <details>
+      <summary>Is it really free?</summary>
+      <p>Yes. It's open source under the MIT license: free to use, share and modify.</p>
+    </details>
+    <details>
+      <summary>How do I uninstall it?</summary>
+      <p>Quit it from its menu bar panel, drag it from Applications to the Trash, and remove it from System Settings → Privacy &amp; Security → Accessibility.</p>
+    </details>
+  </div>
+</section>
+
+<footer>
+  <p>MIT License · © 2026 Steve Liang · <a href="https://github.com/hloog0/SmoothWheel">Source on GitHub</a></p>
+  <p>SmoothWheel is an independent project, not affiliated with Logitech or Apple.</p>
+</footer>
+
+</div>
+</body>
+</html>

@@ -16,16 +16,20 @@ SmoothWheel watches scroll events. When one comes from a mouse wheel, it swallow
 
 Trackpad and Magic Mouse scrolls are recognized by their gesture phases and pass through untouched.
 
-## Requirements
-
-- macOS 15 or later
-- The Xcode Command Line Tools, to build it. If you don't have them, install them with:
-
-```bash
-xcode-select --install
-```
+Website: **[hloog0.github.io/SmoothWheel](https://hloog0.github.io/SmoothWheel/)**
 
 ## Install
+
+Requires macOS 15 or later. Runs on Apple Silicon and Intel Macs.
+
+1. Download **[SmoothWheel.zip](https://github.com/hloog0/SmoothWheel/releases/latest/download/SmoothWheel.zip)** from the [latest release](https://github.com/hloog0/SmoothWheel/releases/latest) and double-click it to unzip.
+2. Drag **SmoothWheel** into your **Applications** folder.
+3. Open it. macOS will say it couldn't verify the app, because free apps like this aren't signed through Apple's paid developer program. Click **Done**, then go to **System Settings → Privacy & Security**, scroll down and click **Open Anyway**. You only need to do this once.
+4. When asked, turn on **SmoothWheel** under **System Settings → Privacy & Security → Accessibility**. It picks that up within a couple of seconds, so there's no need to relaunch.
+
+### Build from source
+
+You need the Xcode Command Line Tools (`xcode-select --install`). Then:
 
 ```bash
 git clone https://github.com/hloog0/SmoothWheel.git
@@ -33,11 +37,9 @@ cd SmoothWheel
 ./build.sh
 ```
 
-`build.sh` builds the app, installs it to `~/Applications/SmoothWheel.app` and launches it.
+`build.sh` builds the app for Apple Silicon and Intel, installs it into `/Applications` (or `~/Applications` if you can't write to `/Applications`) and launches it.
 
-On first launch, macOS asks you to grant **Accessibility** access: System Settings → Privacy & Security → Accessibility → turn on SmoothWheel. SmoothWheel picks it up within a couple of seconds, so there's no need to relaunch.
-
-### Keeping the permission across updates (optional)
+### Keeping the permission across rebuilds (optional)
 
 macOS remembers Accessibility permission per code signature. Without a signing certificate, every build looks like a new app and you'll need to re-enable it after each update. To avoid that, run this once before `./build.sh`:
 
@@ -78,7 +80,7 @@ SmoothWheel needs Accessibility access because that's the only way macOS allows 
 3. Delete the app and its settings:
 
 ```bash
-rm -rf ~/Applications/SmoothWheel.app
+rm -rf /Applications/SmoothWheel.app ~/Applications/SmoothWheel.app
 defaults delete com.steve.smoothwheel
 ```
 
@@ -87,8 +89,9 @@ defaults delete com.steve.smoothwheel
 ## Development
 
 ```bash
-./test.sh    # unit tests
-open --env SMOOTHWHEEL_LOG=1 --stderr /tmp/smoothwheel.log ~/Applications/SmoothWheel.app    # run with the debug log
+./test.sh                 # unit tests
+open --env SMOOTHWHEEL_LOG=1 --stderr /tmp/smoothwheel.log /Applications/SmoothWheel.app    # run with the debug log
+./scripts/release.sh      # publish a GitHub release (bump the version in Resources/Info.plist first)
 ```
 
 Use `./test.sh` rather than plain `swift test`. With only the Command Line Tools installed, SwiftPM sometimes can't find Swift Testing's macro plugin and reports `plugin for module 'TestingMacros' not found`, which hides real compile errors. The script loads the plugin explicitly.

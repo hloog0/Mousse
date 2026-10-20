@@ -12,3 +12,6 @@ build/
 *.pem
 *.cer
 *.key
+
+# Release downloads
+dist/
